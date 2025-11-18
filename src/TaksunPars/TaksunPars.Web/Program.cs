@@ -1,6 +1,4 @@
-using TaksunPars.Shared.Services;
 using TaksunPars.Web.Components;
-using TaksunPars.Web.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,8 +6,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
-// Add device-specific services used by the TaksunPars.Shared project
-builder.Services.AddSingleton<IFormFactor, FormFactor>();
+//------------------------------------------------------
+builder.Services.AddHttpClient("BackendApi", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7144/api/");
+});
+//------------------------------------------------------
 
 var app = builder.Build();
 
@@ -21,20 +23,15 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+
 app.UseHttpsRedirection();
-
 app.UseAntiforgery();
-
 app.MapStaticAssets();
 
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
-    .AddAdditionalAssemblies(
-        typeof(TaksunPars.Shared._Imports).Assembly,
-        typeof(TaksunPars.Web.Client._Imports).Assembly);
+    .AddAdditionalAssemblies(typeof(TaksunPars.Web.Client._Imports).Assembly);
 
 app.Run();

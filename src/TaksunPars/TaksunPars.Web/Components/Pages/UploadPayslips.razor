@@ -1,0 +1,294 @@
+﻿@page "/upload-payslips"
+@using System.Net.Http.Headers
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>@title</PageTitle>
+<h3>@title</h3>
+
+
+<div class="upload-container">
+    <div class="upload-card">
+        <h2>آپلود فیش حقوقی</h2>
+
+        <div class="file-input-wrapper">
+            <InputFile OnChange="OnFileSelected"
+                       accept=".xlsx,.xls"
+                       class="file-input"/>
+            <button class="btn-select-file" type="button">
+                📁 انتخاب فایل اکسل
+            </button>
+        </div>
+
+        @if (_selectedFile != null)
+        {
+            <div class="file-info">
+                <span class="file-icon">📄</span>
+                <span class="file-name">@_selectedFile.Name</span>
+            </div>
+
+            @if (_uploading)
+            {
+                <div class="progress-bar">
+                    <div class="progress-bar-fill"></div>
+                </div>
+            }
+
+            <button @onclick="UploadFileAsync"
+                    disabled="@_uploading"
+                    class="btn-upload">
+                @(_uploading ? "⏳ در حال آپلود..." : "⬆️ آپلود فایل")
+            </button>
+        }
+
+        @if (_uploadResult != null)
+        {
+            <div class="alert @(_uploadResult.Success ? "alert-success" : "alert-error")">
+                <p>@_uploadResult.Message</p>
+                @if (_uploadResult.ProcessedCount > 0)
+                {
+                    <small>تعداد رکورد پردازش شده: @_uploadResult.ProcessedCount</small>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="help-card">
+        <h3>ℹ️ راهنما</h3>
+        <ul>
+            <li>✅ فرمت فایل: Excel (.xlsx یا .xls)</li>
+            <li>✅ ستون‌های مورد نیاز: کد پرسنلی، سال، ماه</li>
+            <li>✅ حداکثر اندازه: 5 مگابایت</li>
+        </ul>
+    </div>
+</div>
+
+<style>
+    .upload-container {
+        max-width: 500px;
+        margin: 1rem auto;
+        padding: 0 1rem;
+    }
+
+    .upload-card, .help-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    h2 {
+        margin: 0 0 1.5rem 0;
+        text-align: center;
+        color: #333;
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        margin-bottom: 1rem;
+    }
+
+    .file-input {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 100%;
+        cursor: pointer;
+    }
+
+    .btn-select-file {
+        width: 100%;
+        padding: 1rem;
+        background: #0066cc;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        pointer-events: none;
+    }
+
+    .file-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background: #e8f5e9;
+        border-radius: 6px;
+        margin-bottom: 1rem;
+    }
+
+    .file-icon {
+        font-size: 1.5rem;
+    }
+
+    .file-name {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .progress-bar {
+        height: 4px;
+        background: #e0e0e0;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+    }
+
+    .progress-bar-fill {
+        height: 100%;
+        background: #0066cc;
+        animation: progress 1.5s infinite;
+    }
+
+    @@keyframes progress {
+        0% {
+            width: 0%;
+        }
+        50% {
+            width: 70%;
+        }
+        100% {
+            width: 100%;
+        }
+    }
+
+    .btn-upload {
+        width: 100%;
+        padding: 1rem;
+        background: #28a745;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .btn-upload:hover:not(:disabled) {
+        background: #218838;
+    }
+
+    .btn-upload:disabled {
+        background: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .help-card h3 {
+        margin: 0 0 1rem 0;
+        color: #0066cc;
+    }
+
+    .help-card ul {
+        margin: 0;
+        padding: 0 0 0 1.5rem;
+        list-style: none;
+    }
+
+    .help-card li {
+        margin-bottom: 0.5rem;
+    }
+
+    @@media (max-width: 600px) {
+        .upload-container {
+            padding: 0 0.5rem;
+        }
+
+        .upload-card, .help-card {
+            padding: 1rem;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+        }
+    }
+</style>
+
+@code {
+    private readonly string title = "آپلود فایل فیش حقوقی";
+    private IBrowserFile? _selectedFile;
+    private bool _uploading;
+    private UploadResult? _uploadResult;
+
+    private void OnFileSelected(InputFileChangeEventArgs e)
+    {
+        _selectedFile = e.File;
+        _uploadResult = null;
+    }
+
+    private async Task UploadFileAsync()
+    {
+        if (_selectedFile == null) return;
+
+        _uploading = true;
+        _uploadResult = null;
+
+        try
+        {
+            const long maxFileSize = 5 * 1024 * 1024;
+
+            using var httpClient = HttpClientFactory.CreateClient("BackendApi");
+            using var content = new MultipartFormDataContent();
+            var fileContent = new StreamContent(_selectedFile.OpenReadStream(maxFileSize));
+            fileContent.Headers.ContentType = new MediaTypeHeaderValue(_selectedFile.ContentType);
+
+            content.Add(fileContent, "file", _selectedFile.Name);
+
+            var response = await httpClient.PostAsync("payslip/upload", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                _uploadResult = await response.Content.ReadFromJsonAsync<UploadResult>();
+            }
+            else
+            {
+                _uploadResult = new UploadResult
+                {
+                    Success = false,
+                    Message = "خطا در آپلود فایل. لطفا دوباره تلاش کنید."
+                };
+            }
+        }
+        catch (Exception ex)
+        {
+            _uploadResult = new UploadResult
+            {
+                Success = false,
+                Message = $"خطا: {ex.Message}"
+            };
+        }
+        finally
+        {
+            _uploading = false;
+        }
+    }
+
+
+    private class UploadResult
+    {
+        public bool Success { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public int ProcessedCount { get; set; }
+    }
+
+}
