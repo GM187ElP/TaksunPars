@@ -1,8 +1,7 @@
 <Solution>
-  <Project Path="src/TaksunPars/TaksunPars.Shared/TaksunPars.Shared.csproj" />
-  <Project Path="src/TaksunPars/TaksunPars.Web.Client/TaksunPars.Web.Client.csproj" />
-  <Project Path="src/TaksunPars/TaksunPars.Web/TaksunPars.Web.csproj" />
-  <Project Path="src/TaksunPars/TaksunPars/TaksunPars.csproj">
-    <Deploy Solution="Debug|*" />
-  </Project>
+  <Folder Name="/src/">
+    <Project Path="src/TaksunPars/TaksunPars.Web.Client/TaksunPars.Web.Client.csproj" />
+    <Project Path="src/TaksunPars/TaksunPars.Web/TaksunPars.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
 </Solution>
