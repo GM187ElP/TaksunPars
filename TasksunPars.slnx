@@ -1,7 +1,7 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/TaksunPars/TaksunPars.Web.Client/TaksunPars.Web.Client.csproj" />
-    <Project Path="src/TaksunPars/TaksunPars.Web/TaksunPars.Web.csproj" />
+    <Project Path="src/TaksunPars/TaksunPars.Client/TaksunPars.Client.csproj" />
+    <Project Path="src/TaksunPars/TaksunPars/TaksunPars.csproj" />
   </Folder>
   <Folder Name="/tests/" />
 </Solution>

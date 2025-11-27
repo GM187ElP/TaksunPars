@@ -1,0 +1,239 @@
+﻿@page "/add-employee"
+
+@using ERP.UI.Blazor.Models
+@inject IHttpClientFactory httpClientFactory
+
+<h3>Add Employee</h3>
+
+<EditForm Model="dto" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <!-- BASIC INFO -->
+    <h4>Basic Information</h4>
+
+    <div class="form-group">
+        <label>Employee Code</label>
+        <InputText class="form-control" @bind-Value="dto.EmployeeCode" />
+    </div>
+
+    <div class="form-group">
+        <label>First Name</label>
+        <InputText class="form-control" @bind-Value="dto.FirstName" />
+    </div>
+
+    <div class="form-group">
+        <label>Last Name</label>
+        <InputText class="form-control" @bind-Value="dto.LastName" />
+    </div>
+
+    <div class="form-group">
+        <label>National ID</label>
+        <InputText class="form-control" @bind-Value="dto.NationalId" />
+    </div>
+
+    <div class="form-group">
+        <label>Gender</label>
+        <InputSelect class="form-control" @bind-Value="dto.Gender">
+            <option value="">Select...</option>
+            <option>Male</option>
+            <option>Female</option>
+        </InputSelect>
+    </div>
+
+
+    <!-- RESIDENCE (Province -> City) -->
+    @* <h4>Residence Information</h4>
+
+    <div class="form-group">
+        <label>Province (Residence)</label>
+        <InputSelect class="form-control" @bind-Value="selectedResidenceProvinceId" TValue="Guid"
+                     @onchange="OnResidenceProvinceChange">
+            <option value="">Select...</option>
+            @foreach (var p in provinceDto.Data)
+            {
+                <option value="@p.Id">@p.Name</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="form-group">
+        <label>City (Residence)</label>
+        <InputSelect class="form-control" @bind-Value="dto.CityId" TValue="Guid?">
+            <option value="">Select...</option>
+            @if (residenceCitiesDto?.Data != null)
+            {
+                @foreach (var c in residenceCitiesDto.Data)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            }
+        </InputSelect>
+    </div> *@
+
+
+    <!-- BIRTHPLACE -->
+    <h4>Birth Information</h4>
+
+    <div class="form-group">
+        <label>Birth Province</label>
+        <InputSelect class="form-control" @bind-Value="selectedBirthProvinceId" TValue="Guid"
+                     @onchange="OnBirthProvinceChange">
+            <option value="">Select...</option>
+            @foreach (var p in provinceDto.Data)
+            {
+                <option value="@p.Id">@p.Name</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="form-group">
+        <label>Birth City</label>
+        <InputSelect class="form-control" @bind-Value="dto.BirthPlaceId" TValue="Guid?">
+            <option value="">Select...</option>
+            @if (birthCitiesDto?.Data != null)
+            {
+                @foreach (var c in birthCitiesDto.Data)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            }
+        </InputSelect>
+    </div>
+
+
+    <!-- SHENASNAME ISSUED PLACE -->
+    <h4>Shenasname Information</h4>
+
+    <div class="form-group">
+        <label>Issued Province</label>
+        <InputSelect class="form-control" @bind-Value="selectedIssuedProvinceId" TValue="Guid"
+                     @onchange="OnIssuedProvinceChange">
+            <option value="">Select...</option>
+            @foreach (var p in provinceDto.Data)
+            {
+                <option value="@p.Id">@p.Name</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="form-group">
+        <label>Issued City</label>
+        <InputSelect class="form-control" @bind-Value="dto.ShenasnameIssuedPlaceId" TValue="Guid?">
+            <option value="">Select...</option>
+            @if (issuedCitiesDto?.Data != null)
+            {
+                @foreach (var c in issuedCitiesDto.Data)
+                {
+                    <option value="@c.Id">@c.Name</option>
+                }
+            }
+        </InputSelect>
+    </div>
+
+
+    <!-- JOB INFO -->
+    <h4>Job Information</h4>
+
+    <div class="form-group">
+        <label>Department</label>
+        <InputSelect class="form-control" @bind-Value="dto.DepartmentId" TValue="Guid?"
+                     @onchange="OnDepartmentChange">
+            <option value="">Select...</option>
+            @foreach (var d in departmentDto.Data)
+            {
+                <option value="@d.Id">@d.Name</option>
+            }
+        </InputSelect>
+    </div>
+
+    <div class="form-group">
+        <label>Job Title</label>
+        <InputSelect class="form-control" @bind-Value="dto.JobTitleId" TValue="Guid?">
+            <option value="">Select...</option>
+            @if (jobTitleDto?.Data != null)
+            {
+                @foreach (var j in jobTitleDto.Data)
+                {
+                    <option value="@j.Id">@j.Title</option>
+                }
+            }
+        </InputSelect>
+    </div>
+
+
+    <button class="btn btn-primary" type="submit">Save</button>
+</EditForm>
+
+
+@code {
+    private AddEmployeeDto dto = new();
+    private HttpClient http;
+
+    private ResultData<List<ProvinceDto>> provinceDto = new() { Data=new()};
+    private ResultData<List<DepartmentDto>> departmentDto = new() { Data = new() };
+    private ResultData<List<JobTitleDto>> jobTitleDto = new() { Data = new() };
+    private ResultData<List<CitiesDto>> birthCitiesDto = new() { Data = new() };
+    private ResultData<List<CitiesDto>> residenceCitiesDto = new() { Data=new()};
+    private ResultData<List<CitiesDto>> issuedCitiesDto = new() { Data=new()};
+
+    
+
+
+
+    private Guid selectedResidenceProvinceId;
+    private Guid selectedBirthProvinceId;
+    private Guid selectedIssuedProvinceId;
+
+    protected override async Task OnInitializedAsync()
+    {
+        http = httpClientFactory.CreateClient("ERP.API");
+
+        departmentDto = await http.GetFromJsonAsync<ResultData<List<DepartmentDto>>>("Department/All");
+        provinceDto = await http.GetFromJsonAsync<ResultData<List<ProvinceDto>>>("Province/All");
+    }
+
+
+    private async Task OnResidenceProvinceChange(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var id))
+        {
+            selectedResidenceProvinceId = id;
+            residenceCitiesDto = await http.GetFromJsonAsync<ResultData<List<CitiesDto>>>($"City/ByProvince/{id}");
+        }
+    }
+
+    private async Task OnBirthProvinceChange(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var id))
+        {
+            selectedBirthProvinceId = id;
+            birthCitiesDto = await http.GetFromJsonAsync<ResultData<List<CitiesDto>>>($"City/ByProvince/{id}");
+        }
+    }
+
+    private async Task OnIssuedProvinceChange(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var id))
+        {
+            selectedIssuedProvinceId = id;
+            issuedCitiesDto = await http.GetFromJsonAsync<ResultData<List<CitiesDto>>>($"City/ByProvince/{id}");
+        }
+    }
+
+    private async Task OnDepartmentChange(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var id))
+        {
+            dto.DepartmentId = id;
+            jobTitleDto = await http.GetFromJsonAsync<ResultData<List<JobTitleDto>>>($"JobTitle/ByDepartment/{id}");
+        }
+    }
+
+
+    private async Task HandleSubmit()
+    {
+        var response = await http.PostAsJsonAsync("Employee/Add", dto);
+        Console.WriteLine(response.IsSuccessStatusCode ? "Saved" : "Error");
+    }
+}
