@@ -12,18 +12,18 @@
 
 public class Result<T> where T : class
 {
-    public ResultData<T> Data { get; set; } = new();
+    public ResultData<T> Payload { get; set; } = new();
     public ResultStatus Status { get; set; } = new();
 }
 
 public class ResultData<T> where T : class
 {
-    public T? Data { get; set; }
+    public T? Value { get; set; }
 }
 
-public class ResultStatus 
+public class ResultStatus
 {
-    public bool IsPartialySuccess { get; set; }
+    public bool IsPartialySuccess { get; set; } = false;
     public List<string> Errors { get; set; } = [];
     public bool IsSuccess => Errors.Count == 0;
 }

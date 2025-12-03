@@ -34,9 +34,9 @@
 
             content.Add(fileContent, "payslipFile", file.Name);
             
-            var http = ClientFactory.CreateClient("Api");
+            var http = ClientFactory.CreateClient("ERP.API");
 
-            var response = await http.PostAsync("payslip/upload", content);
+            var response = await http.PostAsync("Payslip/upload", content);
 
             if (response.IsSuccessStatusCode)
             {

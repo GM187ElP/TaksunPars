@@ -80,7 +80,7 @@
         <InputSelect class="form-control" @bind-Value="selectedBirthProvinceId" TValue="Guid"
                      @onchange="OnBirthProvinceChange">
             <option value="">Select...</option>
-            @foreach (var p in provinceDto.Data)
+            @foreach (var p in provinceDto.Value)
             {
                 <option value="@p.Id">@p.Name</option>
             }
@@ -91,9 +91,9 @@
         <label>Birth City</label>
         <InputSelect class="form-control" @bind-Value="dto.BirthPlaceId" TValue="Guid?">
             <option value="">Select...</option>
-            @if (birthCitiesDto?.Data != null)
+            @if (birthCitiesDto?.Value != null)
             {
-                @foreach (var c in birthCitiesDto.Data)
+                @foreach (var c in birthCitiesDto.Value)
                 {
                     <option value="@c.Id">@c.Name</option>
                 }
@@ -110,7 +110,7 @@
         <InputSelect class="form-control" @bind-Value="selectedIssuedProvinceId" TValue="Guid"
                      @onchange="OnIssuedProvinceChange">
             <option value="">Select...</option>
-            @foreach (var p in provinceDto.Data)
+            @foreach (var p in provinceDto.Value)
             {
                 <option value="@p.Id">@p.Name</option>
             }
@@ -121,9 +121,9 @@
         <label>Issued City</label>
         <InputSelect class="form-control" @bind-Value="dto.ShenasnameIssuedPlaceId" TValue="Guid?">
             <option value="">Select...</option>
-            @if (issuedCitiesDto?.Data != null)
+            @if (issuedCitiesDto?.Value != null)
             {
-                @foreach (var c in issuedCitiesDto.Data)
+                @foreach (var c in issuedCitiesDto.Value)
                 {
                     <option value="@c.Id">@c.Name</option>
                 }
@@ -140,7 +140,7 @@
         <InputSelect class="form-control" @bind-Value="dto.DepartmentId" TValue="Guid?"
                      @onchange="OnDepartmentChange">
             <option value="">Select...</option>
-            @foreach (var d in departmentDto.Data)
+            @foreach (var d in departmentDto.Value)
             {
                 <option value="@d.Id">@d.Name</option>
             }
@@ -151,9 +151,9 @@
         <label>Job Title</label>
         <InputSelect class="form-control" @bind-Value="dto.JobTitleId" TValue="Guid?">
             <option value="">Select...</option>
-            @if (jobTitleDto?.Data != null)
+            @if (jobTitleDto?.Value != null)
             {
-                @foreach (var j in jobTitleDto.Data)
+                @foreach (var j in jobTitleDto.Value)
                 {
                     <option value="@j.Id">@j.Title</option>
                 }
@@ -170,12 +170,12 @@
     private AddEmployeeDto dto = new();
     private HttpClient http;
 
-    private ResultData<List<ProvinceDto>> provinceDto = new() { Data=new()};
-    private ResultData<List<DepartmentDto>> departmentDto = new() { Data = new() };
-    private ResultData<List<JobTitleDto>> jobTitleDto = new() { Data = new() };
-    private ResultData<List<CitiesDto>> birthCitiesDto = new() { Data = new() };
-    private ResultData<List<CitiesDto>> residenceCitiesDto = new() { Data=new()};
-    private ResultData<List<CitiesDto>> issuedCitiesDto = new() { Data=new()};
+    private ResultData<List<ProvinceDto>> provinceDto = new() { Value=new()};
+    private ResultData<List<DepartmentDto>> departmentDto = new() { Value = new() };
+    private ResultData<List<JobTitleDto>> jobTitleDto = new() { Value = new() };
+    private ResultData<List<CitiesDto>> birthCitiesDto = new() { Value = new() };
+    private ResultData<List<CitiesDto>> residenceCitiesDto = new() { Value=new()};
+    private ResultData<List<CitiesDto>> issuedCitiesDto = new() { Value=new()};
 
     
 

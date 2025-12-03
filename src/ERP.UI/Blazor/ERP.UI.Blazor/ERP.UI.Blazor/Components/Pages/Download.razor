@@ -21,15 +21,11 @@ else if (payslip != null)
 {
     <div class="payslip-container">
 
-        <button class="btn btn-primary" @onclick="DownloadPdf" style="width:100%; margin-bottom:15px;">
-            دانلود PDF
-        </button>
-
         <div class="card">
             <div class="title">فیش حقوقی @payslip.Month @payslip.Year</div>
 
             <div class="section-title">اطلاعات فردی</div>
-            <div class="row"><div class="label">کد پرسنلی:</div><div class="value">@payslip.PersonnelCode</div></div>
+            <div class="row"><div class="label">کد پرسنلی:</div><div class="value">@payslip.EmployeeCode</div></div>
             <div class="row"><div class="label">نام:</div><div class="value">@payslip.FullName</div></div>
 
             <div class="section-title">حقوق پایه</div>
@@ -65,16 +61,21 @@ else if (payslip != null)
     [Parameter] public string Month { get; set; } = "9";
 
 
-    private DownloadPayslipDto? payslip;
+    private GetPayslipDto? payslip;
     private bool loading = true;
     private string? error;
-    private HttpClient http => ClientFactory.CreateClient("Api");
+    private HttpClient http; 
 
     protected override async Task OnInitializedAsync()
     {
+       http= ClientFactory.CreateClient("ERP.API");
         try
         {
-            payslip = await http.GetFromJsonAsync<DownloadPayslipDto>($"payslip/download/{PersonnelCode}/{Year}/{Month}"); 
+            var result = await http.GetFromJsonAsync<Result<GetPayslipDto>>($"Payslip/get/{PersonnelCode}/{Year}/{Month}");
+            if (result.Status.IsSuccess)
+                payslip = result.Payload.Value;
+            else
+                payslip = new();
         }
         catch (Exception ex)
         {
@@ -86,23 +87,23 @@ else if (payslip != null)
         }
     }
 
-    private async Task DownloadPdf()
-    {
-        var response = await http.PostAsJsonAsync("Payslip/GetPdf", payslip);
+    // private async Task DownloadPdf()
+    // {
+    //     var response = await http.PostAsJsonAsync("Payslip/GetPdf", payslip);
 
-        if (!response.IsSuccessStatusCode)
-        {
-            Console.WriteLine("Failed to download PDF");
-            return;
-        }
+    //     if (!response.IsSuccessStatusCode)
+    //     {
+    //         Console.WriteLine("Failed to download PDF");
+    //         return;
+    //     }
 
-        var pdfBytes = await response.Content.ReadAsByteArrayAsync();
+    //     var pdfBytes = await response.Content.ReadAsByteArrayAsync();
 
-        var fileName = $"Payslip_{payslip.PersonnelCode}_{payslip.Year}_{payslip.Month}.pdf";
+    //     var fileName = $"Payslip_{payslip.PersonnelCode}_{payslip.Year}_{payslip.Month}.pdf";
 
-        using var streamRef = new DotNetStreamReference(new MemoryStream(pdfBytes));
-        await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
-    }
+    //     using var streamRef = new DotNetStreamReference(new MemoryStream(pdfBytes));
+    //     await JS.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+    // }
 }
 
 <style>

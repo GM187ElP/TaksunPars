@@ -1,7 +1,6 @@
 <Solution>
   <Folder Name="/src/">
-    <Project Path="src/TaksunPars/TaksunPars.Client/TaksunPars.Client.csproj" />
-    <Project Path="src/TaksunPars/TaksunPars/TaksunPars.csproj" />
+    <Project Path="src/ERP.UI/Blazor/ERP.UI.Blazor/ERP.UI.Blazor/ERP.UI.Blazor.csproj" />
   </Folder>
   <Folder Name="/tests/" />
 </Solution>

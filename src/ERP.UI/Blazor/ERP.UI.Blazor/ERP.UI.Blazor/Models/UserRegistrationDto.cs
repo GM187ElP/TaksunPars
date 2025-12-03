@@ -4,13 +4,17 @@ namespace ERP.UI.Blazor.Models;
 
 public class UserRegistrationDto
 {
-    [Required]
-    public string Username { get; set; } = string.Empty;
-    [Required]
+    [Required(ErrorMessage = "کد ملی را وارد کنید")]
+    [StringLength(10, MinimumLength = 10, ErrorMessage = "کد ملی باید 10 رقم باشد")]
+    public string? Username { get; set; }
+
+    [Required(ErrorMessage = "رمز عبور را وارد کنید")]
     [DataType(DataType.Password)]
-    public string Password { get; set; } = string.Empty;
-    [Required]
+    [StringLength(100, MinimumLength = 6, ErrorMessage = "رمز عبور باید حداقل 6 کاراکتر باشد")]
+    public string? Password { get; set; }
+
+    [Required(ErrorMessage = "تکرار رمز عبور را وارد کنید")]
+    [Compare("Password", ErrorMessage = "تکرار رمز عبور با رمز عبور یکسان نمی باشد")]
     [DataType(DataType.Password)]
-    [Compare("Password", ErrorMessage = "رمز عبور و تکرار رمز عبور یکسان نیستند")]
-    public string ConfirmPassword { get; set; } = string.Empty;
+    public string? ConfirmPassword { get; set; }
 }

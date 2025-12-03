@@ -1,0 +1,65 @@
+﻿@page "/user-registration"
+@using System.ComponentModel.DataAnnotations
+@using ERP.UI.Blazor.Models
+@inject IHttpClientFactory clientFactory
+
+<PageTitle>@title</PageTitle>
+
+<h3>@title</h3>
+
+<EditForm Model="dto" OnValidSubmit="Save">
+    <DataAnnotationsValidator />
+    @* <ValidationSummary /> *@
+
+    <div class="form-group">
+        <label for="username">کد ملی:</label>
+        <InputText id="username" class="form-control" @bind-Value="dto.Username" />
+        <ValidationMessage For="@(() => dto.Username)" />
+    </div>
+
+    <div class="form-group">
+        <label for="password">رمز عبور:</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="dto.Password" />
+        <ValidationMessage For="@(() => dto.Password)" />
+    </div>
+
+    <div class="form-group">
+        <label for="confirmPassword">تکرار رمز عبور:</label>
+        <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="dto.ConfirmPassword" />
+        <ValidationMessage For="@(() => dto.ConfirmPassword)" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">ثبت</button>
+</EditForm>
+
+@code {
+    private string title = "ثبت نام کاربر";
+    private UserRegistrationDto dto = new();
+
+    private HttpClient httpClient;
+
+    protected override void OnInitialized()
+    {
+        httpClient = clientFactory.CreateClient("ERP.API");
+    }
+
+    private async Task Save()
+    {
+        if (dto.Password != dto.ConfirmPassword)
+        {
+            // Handle password mismatch
+            return;
+        }
+
+        var response = await httpClient.PostAsJsonAsync("IAM/register", dto);
+
+        if (response.IsSuccessStatusCode)
+        {
+            Console.WriteLine("User registered successfully!");
+        }
+        else
+        {
+            Console.WriteLine("Error registering user.");
+        }
+    }
+}
