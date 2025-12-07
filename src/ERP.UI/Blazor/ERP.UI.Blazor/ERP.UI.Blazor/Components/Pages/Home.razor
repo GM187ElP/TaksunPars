@@ -1,7 +1,43 @@
 ﻿@page "/"
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization;
+@attribute [Authorize]
+@inject IHttpClientFactory clientFactory;
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+old home page
+
+<button @onclick="GetMe">Me</button>
+
+
+
+<AuthorizeView>
+    you are authorized
+</AuthorizeView>
+
+<InputText @bind-Value=@Ok/>
+
+@code{
+    private String Ok = "";
+
+    private async Task GetMe()
+    {
+        var http = clientFactory.CreateClient("Api"); // fresh!
+        var response = await http.GetAsync("IAM/me");
+
+        if (response.IsSuccessStatusCode)
+            Ok = "everything is ok";
+
+        StateHasChanged();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+         
+
+    
+    }
+}

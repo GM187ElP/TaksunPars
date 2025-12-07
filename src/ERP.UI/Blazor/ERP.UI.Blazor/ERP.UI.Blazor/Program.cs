@@ -1,60 +1,56 @@
-using ERP.UI.Blazor.Components;
-using ERP.UI.Blazor.Services;
-using Microsoft.AspNetCore.Components.Authorization;
+﻿using ERP.UI.Blazor.Components;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ---------------------------------------------------------------
-// Services
-// ---------------------------------------------------------------
-
-// Razor / Blazor Server
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-builder.Services.AddServerSideBlazor()
-    .AddCircuitOptions(o => o.DetailedErrors = true);
-
-// HttpClient to call API
-builder.Services.AddHttpClient("ERP.API", client =>
+builder.Services.AddHttpClient("Api", option =>
 {
-    client.BaseAddress = new Uri("https://localhost:7144/");
+    option.BaseAddress = new Uri("https://localhost:7144/");
 });
 
-// Auth services
-builder.Services.AddAuthorizationCore();
-builder.Services.AddScoped<ApiAuthStateProvider>();
-builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthStateProvider>();
+builder.Services.AddAuthentication("CustomAuthScheme")
+    .AddCookie("CustomAuthScheme", options =>
+    {
+        options.Cookie.Name = "auth_session";
+        options.LoginPath = "/login";
+        options.LogoutPath = "/logout";
+        options.SlidingExpiration = true;
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.Strict;
+    });
 
-// Our UI authentication service
-builder.Services.AddScoped<AuthenticationService>();
 
-// HttpContext only for initial connection
-builder.Services.AddHttpContextAccessor();
+builder.Services.AddAuthorization();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddRazorPages();
 
-// Antiforgery
-builder.Services.AddAntiforgery();
-
-// ---------------------------------------------------------------
-// App
-// ---------------------------------------------------------------
 var app = builder.Build();
 
-// ---------------------------------------------------------------
-// Middleware
-// ---------------------------------------------------------------
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
+app.UseStatusCodePagesWithReExecute("/not-found");
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 app.UseAntiforgery();
 
+app.MapRazorPages();
 app.MapStaticAssets();
+
+// These lines render Blazor, but do NOT include automatic fallback
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// You must add this for redirecting to "/" to work
+
 
 app.Run();
