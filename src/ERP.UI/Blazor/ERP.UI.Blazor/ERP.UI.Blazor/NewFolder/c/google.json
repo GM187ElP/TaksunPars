@@ -1,0 +1,18 @@
+{
+  "google": {
+    "client_id": "938350234199-i5n7f62osdfauijk6coqgupq2130623q.apps.googleusercontent.com",
+    "redirect_uris": [
+      "https://localhost:7196/auth-callback"
+    ],
+    "auth_uri": "https://accounts.google.com/o/oauth2/auth"
+  },
+
+  "github": {
+    "client_id": "Ov23liME6srILua4m9LY",
+    "redirect_uris": [
+      "https://localhost:7196/auth-callback"
+    ],
+    "authorization_endpoint": "https://github.com/login/oauth/authorize",
+    "token_endpoint": "https://github.com/login/oauth/access_token"
+  }
+}

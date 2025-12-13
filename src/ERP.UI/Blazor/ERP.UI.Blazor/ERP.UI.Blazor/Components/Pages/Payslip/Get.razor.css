@@ -1,0 +1,317 @@
+﻿* {
+    box-sizing: border-box;
+}
+
+.payslip-container {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 20px;
+    direction: rtl;
+    font-family: 'Segoe UI', 'IRANSans', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    min-height: 100vh;
+}
+
+.card {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 20px;
+    padding: 25px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+    }
+
+/* Filter Card */
+.filter-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+    .filter-card .title {
+        color: white;
+        margin-bottom: 20px;
+    }
+
+    .filter-card label {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .filter-card . form-control {
+        background: rgba(255, 255, 255, 0.95);
+        border: none;
+        color: #333;
+        padding: 10px 12px;
+        border-radius: 8px;
+    }
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Button */
+.btn {
+    width: 100%;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: #fff;
+    color: #667eea;
+}
+
+    .btn-primary:hover {
+        background: #f0f0f0;
+        transform: scale(1.02);
+    }
+
+.btn-icon {
+    font-size: 18px;
+}
+
+/* Error Card */
+.error-card {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    text-align: center;
+    padding: 40px;
+}
+
+.error-icon {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.error-text {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Loading */
+.loading-text {
+    text-align: center;
+    padding: 30px;
+    font-size: 18px;
+    color: #667eea;
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.6;
+    }
+}
+
+/* Payslip Card */
+.payslip-card {
+    border: 1px solid #e0e0e0;
+}
+
+.payslip-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.payslip-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.payslip-year {
+    font-size: 16px;
+    color: #667eea;
+    font-weight: 600;
+}
+
+/* Title */
+.title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* Sections */
+.section {
+    margin-bottom: 25px;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid #667eea;
+}
+
+. section-icon {
+    font-size: 24px;
+}
+
+. section-content {
+    padding: 0 10px;
+}
+
+/* Info Row */
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s ease;
+}
+
+    .info-row:last-child {
+        border-bottom: none;
+    }
+
+    . info-row:hover {
+        background: #f9f9f9;
+        padding: 12px 8px;
+        border-radius: 4px;
+    }
+
+    .info-row. highlight {
+        background: #f0f4ff;
+        padding: 12px 10px;
+        border-radius: 6px;
+        border: 1px solid #e0e8ff;
+    }
+
+.info-label {
+    font-size: 15px;
+    color: #666;
+    font-weight: 600;
+}
+
+. info-value {
+    font-size: 15px;
+    font-weight: 700;
+    color: #333;
+}
+
+    . info-value.deduction {
+        color: #e74c3c;
+    }
+
+/* Summary Section */
+.summary-section {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.summary-row {
+    padding: 15px 10px;
+    background: #f9f9f9;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+    . summary-row .info-label {
+        font-size: 16px;
+        color: #333;
+    }
+
+    .summary-row . info-value {
+        font-size: 16px;
+        color: #667eea;
+    }
+
+.net-row {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    border: none;
+}
+
+    .net-row . info-label {
+        color: white;
+    }
+
+.net-payable {
+    color: #fff !important;
+    font-size: 18px;
+}
+
+. total-benefits {
+    color: #27ae60;
+}
+
+.total-deductions {
+    color: #e74c3c;
+}
+
+/* Form Control */
+.form-control {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    transition: border-color 0.3s ease;
+}
+
+    . form-control:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+/* Responsive */
+@media (max-width: 600px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .payslip-title {
+        font-size: 20px;
+    }
+
+    . section-title {
+        font-size: 16px;
+    }
+
+    .info-label,
+    .info-value {
+        font-size: 14px;
+    }
+}

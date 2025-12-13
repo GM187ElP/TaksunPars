@@ -49,7 +49,7 @@
         var loginResult = await response.Content.ReadFromJsonAsync<LoginResultDto>();
 
         // Redirect to the Sign-In page to set cookies and claims
-        Navigation.NavigateTo($"/signin/{loginResult.UserId}/{loginResult.UserName}", forceLoad: true);
+        Navigation.NavigateTo($"/signin/{loginResult.UserId}/{loginResult.UserName}",forceLoad:true);
 
     }
 

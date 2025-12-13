@@ -1,0 +1,99 @@
+﻿@using System.Text.Json
+@inject AppLanguageService languageService
+
+@if (IsMudTh)
+{
+    if (!PropertyList.Any())
+    {
+        <MudTh>
+            <MudTableSortLabel SortBy="@GetSortFunc(EntityType, PropertyNameString)">
+                @GetDisplayName(EntityType, PropertyNameString)
+            </MudTableSortLabel>
+        </MudTh>
+    }
+    else
+    {
+        foreach (var prop in PropertyList)
+        {
+            <MudTh>
+                <MudTableSortLabel SortBy="@GetSortFunc(EntityType, prop)">
+                    @GetDisplayName(EntityType, prop)
+                </MudTableSortLabel>
+            </MudTh>
+        }
+    }
+}
+else if (IsMudTd)
+{
+    if (!PropertyList.Any())
+    {
+        <MudTd DataLabel="@GetDisplayName(EntityType, PropertyNameString)">
+            @ChildContent
+        </MudTd>
+    }
+    else
+    {
+        foreach (var prop in PropertyList)
+        {
+            <MudTd DataLabel="@GetDisplayName(EntityType, PropertyNameString)">
+                @{
+                    var property = EntityType.GetProperty(prop);
+                    var value = property.GetValue(Context);
+                }
+                @value
+            </MudTd>
+        }
+    }
+}
+else
+{
+    <label for="@For">
+        @GetDisplayName(EntityType, PropertyNameString)
+    </label>
+}
+
+@code {
+    [Parameter] public Type EntityType { get; set; } = default!;
+    [Parameter] public string PropertyNameString { get; set; } = default!;
+    [Parameter] public string? For { get; set; }
+    [Parameter] public object? Test { get; set; }
+    [Parameter] public object? Context { get; set; }
+    [Parameter] public List<string>? PropertyList { get; set; } = [];
+    [Parameter] public string? SearchString { get; set; } = string.Empty;
+
+
+    // MudBlazor Table
+    [Parameter] public bool IsMudTh { get; set; }
+    [Parameter] public bool IsMudTd { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+
+    protected override void OnInitialized()
+    {
+        languageService.LanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        languageService.LanguageChanged -= OnLanguageChanged;
+    }
+
+    private string GetDisplayName(Type dtoType, string property)
+    {
+        var key = $"DisplayName.{dtoType.Name}.{property}";
+        return languageService.Translate(key);
+    }
+
+    private Func<object, object> GetSortFunc(Type entityType, string propertyName)
+    {
+        var propInfo = entityType.GetProperty(propertyName);
+        return x => propInfo?.GetValue(x) ?? "";
+    }
+
+
+}

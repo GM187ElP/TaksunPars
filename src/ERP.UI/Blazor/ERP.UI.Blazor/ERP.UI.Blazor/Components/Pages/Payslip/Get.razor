@@ -1,0 +1,374 @@
+﻿@page "/payslip"
+@using ERP.UI.Blazor.Models
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Globalization
+
+@inject IHttpClientFactory ClientFactory
+@attribute [Authorize]
+
+@if (loading)
+{
+    <div class="payslip-container">
+        <div class="card">
+            <div class="loading-text">در حال بارگذاری...</div>
+        </div>
+    </div>
+}
+else if (error != null)
+{
+    <div class="payslip-container">
+        <div class="card error-card">
+            <div class="error-icon">⚠️</div>
+            <div class="error-text">@error</div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="payslip-container">
+        <!-- Filter Card -->
+        <div class="card filter-card">
+            <div class="title">جستجوی فیش حقوقی</div>
+
+            <EditForm Model="@filterModel" OnValidSubmit="@ShowPayslip">
+                <DataAnnotationsValidator />
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="year">سال</label>
+                        <InputSelect id="year" @bind-Value="filterModel.Year" class="form-control">
+                            <option value="0">انتخاب کنید</option>
+                            @foreach (var year in years)
+                            {
+                                <option value="@year">@year</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="month">ماه</label>
+                        <InputSelect id="month" @bind-Value="filterModel.Month" class="form-control">
+                            <option value="0">انتخاب کنید</option>
+                            @for (int i = 0; i < months.Count; i++)
+                            {
+                                <option value="@(i + 1)">@months[i]</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <span class="btn-icon">🔍</span>
+                    نمایش فیش حقوقی
+                </button>
+            </EditForm>
+        </div>
+
+        <!-- Payslip Card -->
+        @if (payslip != null)
+        {
+            <div class="card payslip-card">
+                <div class="payslip-header">
+                    <div class="payslip-title">فیش حقوقی @GetMonth(filterModel.Month)</div>
+                    <div class="payslip-year">سال @filterModel.Year</div>
+                </div>
+
+                <!-- Personal Info Section -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-icon">👤</span>
+                        اطلاعات فردی
+                    </div>
+                    <div class="section-content">
+                        <div class="info-row">
+                            <span class="info-label">کد پرسنلی</span>
+                            <span class="info-value">@payslip.EmployeeCode</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">نام و نام خانوادگی</span>
+                            <span class="info-value">@payslip.FullName</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Base Salary Section -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-icon">💰</span>
+                        حقوق پایه
+                    </div>
+                    <div class="section-content">
+                        <div class="info-row">
+                            <span class="info-label">حقوق روزانه</span>
+                            <span class="info-value">@FormatNumber(payslip.DailySalary)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">تعداد روز کاری</span>
+                            <span class="info-value">@payslip.WorkingDays</span>
+                        </div>
+                        <div class="info-row highlight">
+                            <span class="info-label">حقوق ثابت</span>
+                            <span class="info-value">@FormatNumber(payslip.MonthlyBaseSalary)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Benefits Section -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-icon">🎁</span>
+                        مزایا و کمک های تکمیلی
+                    </div>
+                    <div class="section-content">
+                        <div class="info-row">
+                            <span class="info-label">بن کارگری</span>
+                            <span class="info-value">@FormatNumber(payslip.WorkerBenefit)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">حق مسکن</span>
+                            <span class="info-value">@FormatNumber(payslip.HousingAllowance)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">حق اولاد</span>
+                            <span class="info-value">@FormatNumber(payslip.ChildAllowance)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">حق عائله مندی / سوخت</span>
+                            <span class="info-value">@FormatNumber(payslip.FamilyOrFuelAllowance)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">حق ناهار</span>
+                            <span class="info-value">@FormatNumber(payslip.LunchAllowance)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">حق ماموریت</span>
+                            <span class="info-value">@FormatNumber(payslip.MissionAllowance)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">موبایل</span>
+                            <span class="info-value">@FormatNumber(payslip.MobileAllowance)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">پورسانت / اضافه کاری</span>
+                            <span class="info-value">@FormatNumber(payslip.CommissionOvertime)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">حق مسئولیت</span>
+                            <span class="info-value">@FormatNumber(payslip.ResponsibilityAllowance)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">سایر مزایا</span>
+                            <span class="info-value">@FormatNumber(payslip.OtherBenefits)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deductions Section -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-icon">📉</span>
+                        کسورات
+                    </div>
+                    <div class="section-content">
+                        <div class="info-row">
+                            <span class="info-label">بیمه سهم کارگر</span>
+                            <span class="info-value deduction">@FormatNumber(payslip.InsuranceWorkerShare)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">بیمه تکمیلی</span>
+                            <span class="info-value deduction">@FormatNumber(payslip.SupplementaryInsurance)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">مالیات درآمد</span>
+                            <span class="info-value deduction">@FormatNumber(payslip.SalaryTax)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">یک در هزار بیمه</span>
+                            <span class="info-value deduction">@FormatNumber(payslip.OnePerThousandInsurance)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">وام صندوق کسر شده</span>
+                            <span class="info-value deduction">@FormatNumber(payslip.FundLoanDeducted)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">وام شرکت کسر شده</span>
+                            <span class="info-value deduction">@FormatNumber(payslip.CompanyLoanDeducted)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">بدهی به شرکت</span>
+                            <span class="info-value deduction">@FormatNumber(payslip.DebtToCompany)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Leave Section -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-icon">📅</span>
+                        مرخصی
+                    </div>
+                    <div class="section-content">
+                        <div class="info-row">
+                            <span class="info-label">مرخصی با حقوق</span>
+                            <span class="info-value">@(payslip.PaidLeaveInDays ?? 0) روز</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">مرخصی بدون حقوق</span>
+                            <span class="info-value">@(payslip.UnpaidLeaveInDays ?? 0) روز</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loans Section -->
+                <div class="section">
+                    <div class="section-title">
+                        <span class="section-icon">🏦</span>
+                        وام‌ها
+                    </div>
+                    <div class="section-content">
+                        <div class="info-row">
+                            <span class="info-label">وام صندوق مانده</span>
+                            <span class="info-value">@FormatNumber(payslip.FundLoanRemaining)</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">وام شرکت مانده</span>
+                            <span class="info-value">@FormatNumber(payslip.CompanyLoanRemaining)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Summary Section -->
+                <div class="section summary-section">
+                    <div class="section-title">
+                        <span class="section-icon">📊</span>
+                        خلاصه نهایی
+                    </div>
+                    <div class="section-content">
+                        <div class="info-row summary-row">
+                            <span class="info-label">جمع حقوق و مزایا</span>
+                            <span class="info-value total-benefits">@FormatNumber(payslip.TotalSalaryAndBenefits)</span>
+                        </div>
+                        <div class="info-row summary-row">
+                            <span class="info-label">جمع کسورات</span>
+                            <span class="info-value total-deductions">@FormatNumber(payslip.TotalDeductions)</span>
+                        </div>
+                        <div class="info-row summary-row">
+                            <span class="info-label">ناخالص دریافتی</span>
+                            <span class="info-value">@FormatNumber(payslip.GrossReceivable)</span>
+                        </div>
+                        <div class="info-row summary-row">
+                            <span class="info-label">کسورات بیمه و مالیات</span>
+                            <span class="info-value deduction">@FormatNumber(payslip.InsuranceAndTaxDeductions)</span>
+                        </div>
+                        <div class="info-row summary-row">
+                            <span class="info-label">خالص دریافتی</span>
+                            <span class="info-value">@FormatNumber(payslip.NetReceivable)</span>
+                        </div>
+                        <div class="info-row summary-row">
+                            <span class="info-label">کسورات شرکت</span>
+                            <span class="info-value deduction">@FormatNumber(payslip.CompanyDeductions)</span>
+                        </div>
+                        <div class="info-row summary-row net-row">
+                            <span class="info-label">خالص پرداختی</span>
+                            <span class="info-value net-payable">@FormatNumber(payslip.NetPayable)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<string> months = new()
+    {
+        "فروردین", "اردیبهشت", "خرداد", "تیر", "امرداد", "شهریور",
+        "مهر", "آبان", "آذر", "دی", "بهمن", "اسفند"
+    };
+
+    private GetPayslipDto? payslip;
+    private bool loading = true;
+    private string? error;
+    private HttpClient http = null!;
+    private PersianCalendar persianCalendar = new();
+    private List<int> years = new();
+    private PayslipFilter filterModel = new();
+
+    private string GetMonth(int monthNum) =>
+        monthNum > 0 && monthNum <= months.Count ? months[monthNum - 1] : "";
+
+    private string FormatNumber(long? value) =>
+        value.HasValue ? value.Value.ToString("N0") : "-";
+
+    protected override async Task OnInitializedAsync()
+    {
+        http = ClientFactory.CreateClient("Api");
+
+        var now = DateTime.Now;
+        var currentPersianYear = persianCalendar.GetYear(now);
+        var currentPersianMonth = persianCalendar.GetMonth(now);
+
+        years = Enumerable.Range(currentPersianYear - 10, 11).ToList();
+        filterModel.Year = currentPersianYear;
+        filterModel.Month = currentPersianMonth;
+
+        loading = false;
+    }
+
+    private async Task ShowPayslip()
+    {
+        if (filterModel.Year <= 0 || filterModel.Month <= 0 || filterModel.Month > 12)
+        {
+            error = "لطفاً سال و ماه معتبر را انتخاب کنید. ";
+            return;
+        }
+
+        loading = true;
+        error = null;
+        payslip = null;
+
+        try
+        {
+            var result = await http.GetFromJsonAsync<Result<GetPayslipDto>>(
+                $"Payslip/get/{filterModel.Year}/{filterModel.Month}");
+
+            if (result?.Status?.IsSuccess == true)
+            {
+                payslip = result.Payload?.Value;
+            }
+            else
+            {
+                if (result?.Status?.Errors != null && result.Status.Errors.Any())
+                {
+                    error = string.Join(", ", result.Status.Errors);
+                }
+                else
+                {
+                    foreach (var error in result.Status.Errors)
+                    {
+                        // error = result?.Status?.Message ?? "فیش حقوقی یافت نشد. ";
+                    }
+                }
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            error = $"خطای اتصال: {ex.Message}";
+        }
+        catch (Exception ex)
+        {
+            error = $"خطا: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private class PayslipFilter
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+    }
+}

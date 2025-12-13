@@ -1,0 +1,63 @@
+﻿@using System.ComponentModel.DataAnnotations
+@using System.Reflection
+@using Microsoft.AspNetCore.Components.Forms
+@inject IServiceProvider ServiceProvider
+@inject AppLanguageService languageService
+
+@code {
+    [CascadingParameter] private EditContext CurrentEditContext { get; set; } = default!;
+    private ValidationMessageStore? messageStore;
+
+    protected override void OnInitialized()
+    {
+        messageStore = new ValidationMessageStore(CurrentEditContext);
+        CurrentEditContext.OnValidationRequested += (s, e) => HandleValidation();
+        CurrentEditContext.OnFieldChanged += (s, e) => messageStore?.Clear(e.FieldIdentifier);
+    }
+
+    private void HandleValidation()
+    {
+        messageStore?.Clear();
+
+        var model = CurrentEditContext.Model;
+        var validationResults = GetValidationResults(model);
+
+        foreach (var property in model.GetType().GetProperties())
+            ProcessPropertyValidation(property, model);
+
+        CurrentEditContext.NotifyValidationStateChanged();
+    }
+
+    private List<ValidationResult> GetValidationResults(object model)
+    {
+        var context = new ValidationContext(model, ServiceProvider, null);
+        var validationResults = new List<ValidationResult>();
+        Validator.TryValidateObject(model, context, validationResults, true);
+        return validationResults;
+    }
+
+    private void ProcessPropertyValidation(PropertyInfo property, object model)
+    {
+        var failedAttributes = GetFailedValidationAttributes(property, model);
+
+        foreach (var attr in failedAttributes)
+        {
+            var field = new FieldIdentifier(model, property.Name);
+            var errorKey = attr.GetType().Name.Replace("Attribute", "");
+            var localizedMessage = GetLocalizedErrorMessage(model.GetType().Name, property.Name, errorKey);
+            messageStore?.Add(field, localizedMessage);
+        }
+    }
+
+    private List<ValidationAttribute> GetFailedValidationAttributes(PropertyInfo property, object model)
+    {
+        var attributes = property.GetCustomAttributes<ValidationAttribute>(true);
+        return attributes.Where(attr => !attr.IsValid(property.GetValue(model))).ToList();
+    }
+
+    private string GetLocalizedErrorMessage(string dtoName, string propertyName, string errorKey)
+    {
+        var fullKey = $"Validation.{dtoName}.{propertyName}.{errorKey}";
+        return languageService.Translate(fullKey);
+    }
+}

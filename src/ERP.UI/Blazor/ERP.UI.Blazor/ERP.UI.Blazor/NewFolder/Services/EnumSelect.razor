@@ -1,0 +1,53 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@typeparam TEnum
+@inject AppLanguageService languageService
+
+<InputSelect @bind-Value="Value" class="@Class">
+    @if (Nullable.GetUnderlyingType(typeof(TEnum)) != null)
+    {
+        <option value="">@Placeholder</option>
+    }
+    @foreach (var option in EnumOptions)
+    {
+        <option value="@option.Value">@option.Display</option>
+    }
+</InputSelect>
+
+@code {
+
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     languageService.LanguageChanged += OnLanguageChanged;
+    // }
+
+    // private void OnLanguageChanged()
+    // {
+    //     InvokeAsync(StateHasChanged);
+    // }
+
+    // public void Dispose()
+    // {
+    //     languageService.LanguageChanged -= OnLanguageChanged;
+    // }
+
+
+
+    [Parameter] public TEnum Value { get; set; }
+    [Parameter] public EventCallback<TEnum> ValueChanged { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public string Placeholder { get; set; } = "Select...";
+
+    private static Type UnderlyingEnum => Nullable.GetUnderlyingType(typeof(TEnum)) ?? typeof(TEnum);
+
+    private IEnumerable<(string Value, string Display)> EnumOptions =>
+        Enum.GetValues(UnderlyingEnum)
+            .Cast<object>()
+            .Select(e => (e.ToString()!, GetLocalizedDisplayName(e)));
+
+    public string GetLocalizedDisplayName(object value)
+    {
+        var key = $"Enum.{UnderlyingEnum.Name}.{value}";
+        return languageService.Translate(key);
+    }
+}

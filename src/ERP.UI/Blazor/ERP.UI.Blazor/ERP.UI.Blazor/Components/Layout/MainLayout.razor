@@ -1,13 +1,34 @@
-﻿@inherits LayoutComponentBase
+﻿@using MudBlazor
+@inherits LayoutComponentBase
+@inject AppLanguageService languageService
 
-<div class="page">
+<MudThemeProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+<MudPopoverProvider />
+
+<div class="page" dir="@Direction">
     <div class="sidebar">
         <NavMenu />
     </div>
-
     <main>
         <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+
+            <div style="width: 70px;">
+                <MudSelect Style="width: 150px;" T="string" @bind-Value="SelectedLanguage">
+                    <MudSelectItem Value="@("En")">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/a/ae/Flag_of_the_United_Kingdom.svg" height="14" class="mr-1" />
+                        @* English *@
+                    </MudSelectItem>
+
+                    <MudSelectItem Value="@("Fa")">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/Flag_of_Iran.svg" height="14" class="mr-1" />
+                        @* فارسی *@
+                    </MudSelectItem>
+                </MudSelect>
+            </div>
+
+            <a class="ms-2" href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
         </div>
 
         <article class="content px-4">
@@ -21,3 +42,39 @@
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private string _selectedLanguage;
+
+    public string Direction => languageService.Direction;
+
+    protected override void OnInitialized()
+    {
+        _selectedLanguage = languageService.Language;
+        languageService.LanguageChanged += OnLanguageChangedEvent;
+    }
+
+    private void OnLanguageChangedEvent()
+    {
+        _selectedLanguage = languageService.Language;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private string SelectedLanguage
+    {
+        get => _selectedLanguage;
+        set
+        {
+            if (_selectedLanguage != value)
+            {
+                _selectedLanguage = value;
+                languageService.SetLanguage(value);
+            }
+        }
+    }
+
+    public void Dispose()
+    {
+        languageService.LanguageChanged -= OnLanguageChangedEvent;
+    }
+}
