@@ -21,10 +21,11 @@ builder.Services.AddTransient<CookieForwardingHandler>();
 // ✅ Add HttpClient for API calls
 builder.Services.AddHttpClient("Api", client =>
 {
-    client.BaseAddress = new Uri("http://taksunparsapi.runasp.net");
+    client.BaseAddress = new Uri("https://taksunpars.liara.run/");
     client.Timeout = TimeSpan.FromSeconds(30);
 })
 .AddHttpMessageHandler<CookieForwardingHandler>();
+
 
 // ✅ Add Cookie Authentication
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -32,8 +33,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         options.Cookie.Name = "auth_session";
         options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.None;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.Strict;
         options.ExpireTimeSpan = TimeSpan.FromHours(8);
         options.SlidingExpiration = true;
         options.LoginPath = "/signin";
@@ -52,7 +53,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddScoped<EnumServices>();
 builder.Services.AddSingleton<AppLanguageService>();
 builder.Services.Configure<ApiConfiguration>(builder.Configuration.GetSection("ApiConfiguration"));
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["ApiConfiguration:Url"]) });
+//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.Configuration["ApiConfiguration:Url"]) });
 builder.Services.AddSingleton<IDisplayName, DisplayName>();
 builder.Services.AddMudServices();
 // ------------------from another project--------------------------
