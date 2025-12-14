@@ -1,0 +1,78 @@
+name: Deploy UI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - 'TaksunPars.UI/**'
+      - '.github/workflows/deploy-ui.yml'
+
+jobs:
+  deploy:
+    name: Deploy UI (${{ github.ref_name }})
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set environment variables
+        run: |
+          BRANCH="${{ github.ref_name }}"
+          
+          if [[ "$BRANCH" == "develop" ]]; then
+            echo "APP_ENV=Development" >> $GITHUB_ENV
+            echo "PORT=5021" >> $GITHUB_ENV
+            echo "API_URL=http://10.11.11.28:5011" >> $GITHUB_ENV
+            echo "CONTAINER_NAME=taksunpars-ui-dev" >> $GITHUB_ENV
+            echo "IMAGE_NAME=taksunpars-ui:dev" >> $GITHUB_ENV
+          else
+            echo "APP_ENV=Production" >> $GITHUB_ENV
+            echo "PORT=5020" >> $GITHUB_ENV
+            echo "API_URL=http://10.11.11.28:5010" >> $GITHUB_ENV
+            echo "CONTAINER_NAME=taksunpars-ui-prod" >> $GITHUB_ENV
+            echo "IMAGE_NAME=taksunpars-ui:prod" >> $GITHUB_ENV
+          fi
+
+      - name: Stop old container
+        run: |
+          docker stop ${CONTAINER_NAME} 2>/dev/null || true
+          docker rm ${CONTAINER_NAME} 2>/dev/null || true
+          docker rmi ${IMAGE_NAME} 2>/dev/null || true
+
+      - name: Build Docker image
+        run: |
+          cd TaksunPars.UI
+          docker build -t ${IMAGE_NAME} .
+
+      - name: Run UI container
+        run: |
+          docker run -d \
+            --name ${CONTAINER_NAME} \
+            -p ${PORT}:8080 \
+            -e "ASPNETCORE_ENVIRONMENT=${APP_ENV}" \
+            -e "DOTNET_ENVIRONMENT=${APP_ENV}" \
+            -e "ApiConfiguration__Url=${API_URL}" \
+            --restart unless-stopped \
+            ${IMAGE_NAME}
+
+      - name: Wait for container
+        run: |
+          echo "Waiting for container to start..."
+          sleep 5
+          docker logs ${CONTAINER_NAME} --tail 50
+
+      - name: Clean up Docker resources
+        if: always()
+        run: |
+          docker image prune -f
+          docker container prune -f
+
+      - name: Deployment complete
+        run: |
+          echo "✅ UI ${APP_ENV} deployed successfully!"
+          echo "Container: ${CONTAINER_NAME}"
+          echo "Port: ${PORT}"
+          docker ps | grep ${CONTAINER_NAME}
